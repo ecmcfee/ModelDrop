@@ -1,0 +1,690 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open-weight LLM release calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#ECF0F2;
+  --card:#FFFFFF;
+  --ink:#10161C;
+  --ink2:#57646E;
+  --ink3:#8A97A1;
+  --rule:#D2DAE0;
+  --grid:#E5EAED;
+  --accent:#14425E;
+  --cell:26px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 80px}
+
+/* ---------- header ---------- */
+header h1{
+  font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;
+  font-weight:700;
+  font-size:clamp(30px,5.2vw,54px);
+  line-height:.98;
+  letter-spacing:-.025em;
+  margin:0 0 10px;
+  max-width:16ch;
+}
+header p{margin:0;max-width:66ch;color:var(--ink2)}
+.tally{display:flex;flex-wrap:wrap;gap:26px;margin:20px 0 0;padding:14px 0 0;border-top:1px solid var(--rule)}
+.tally div span{display:block}
+.tally .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:24px;line-height:1}
+.tally .l{font-size:12px;color:var(--ink2);margin-top:3px}
+
+/* ---------- spectrum ---------- */
+.spectrum{margin:26px 0 0}
+.spectrum svg{display:block;width:100%;height:auto;cursor:crosshair}
+.section-head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  margin:44px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--ink);
+}
+.section-head h2{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
+  font-size:19px;letter-spacing:-.01em;margin:0;
+}
+.section-head .hint{font-size:12.5px;color:var(--ink2);text-align:right}
+
+/* ---------- legend ---------- */
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--rule);background:var(--card);
+  border-radius:3px;padding:4px 9px 4px 7px;font-size:12.5px;
+  cursor:pointer;color:var(--ink);font-family:inherit;
+}
+.chip[aria-pressed="false"]{opacity:.38;background:transparent}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip .ct{font-size:11px;color:var(--ink3)}
+.legend .util{border-style:dashed;color:var(--ink2)}
+
+/* marker glyphs */
+.mk{width:9px;height:9px;flex:none;background:currentColor}
+.mk.circle{border-radius:50%}
+.mk.square{border-radius:1px}
+.mk.diamond{transform:rotate(45deg);border-radius:1px}
+.mk.triangle{background:none;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid currentColor}
+
+/* ---------- year bar ---------- */
+.years{display:flex;flex-wrap:wrap;gap:4px;margin:18px 0 16px}
+.yr{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:500;
+  background:var(--card);border:1px solid var(--rule);border-radius:3px;
+  padding:6px 12px;font-size:14px;cursor:pointer;color:var(--ink);
+  display:flex;align-items:baseline;gap:7px;
+}
+.yr .ct{font-size:11px;color:var(--ink3);font-family:"IBM Plex Sans",sans-serif}
+.yr[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.yr[aria-pressed="true"] .ct{color:#9FB2BF}
+.yr:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- calendar layout ---------- */
+.cal-layout{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:1040px){.cal-layout{grid-template-columns:minmax(0,1fr) 330px}}
+
+.months{display:grid;grid-template-columns:repeat(auto-fill,minmax(214px,1fr));gap:14px}
+.month{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 10px 8px}
+.month.empty{opacity:.5}
+.month h3{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:500;
+  font-size:13px;margin:0 0 7px;display:flex;justify-content:space-between;align-items:baseline;
+}
+.month h3 em{font-style:normal;font-size:11px;color:var(--ink3);font-family:"IBM Plex Sans",sans-serif}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);font-size:9.5px;color:var(--ink3);margin-bottom:2px}
+.dow span{text-align:center}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.day{
+  position:relative;aspect-ratio:1/1;min-height:24px;border:0;background:none;padding:0;
+  font:inherit;font-size:9.5px;color:var(--ink3);border-radius:2px;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding-top:2px;line-height:1;
+}
+.day.blank{visibility:hidden}
+.day.has{color:var(--ink);cursor:pointer;background:var(--grid);font-weight:600}
+.day.has:hover{background:#D6E0E6}
+.day.sel{box-shadow:inset 0 0 0 2px var(--accent);background:#DCE7ED}
+.day:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.pips{position:absolute;bottom:2px;left:0;right:0;display:flex;justify-content:center;gap:1.5px}
+.pips .mk{width:6px;height:6px}
+.pips .mk.triangle{width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent;border-bottom:6px solid currentColor}
+.pips .more{font-size:8px;color:var(--ink2);line-height:6px}
+
+/* ---------- detail ---------- */
+.detail{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:14px}
+@media(min-width:1040px){.detail{position:sticky;top:14px;align-self:start;max-height:calc(100vh - 28px);overflow:auto}}
+.detail .dt{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:17px;margin:0 0 2px;letter-spacing:-.01em}
+.detail .dsub{font-size:12px;color:var(--ink2);margin:0 0 12px}
+.rel{border-top:1px solid var(--rule);padding:11px 0 2px}
+.rel:first-of-type{border-top:0;padding-top:2px}
+.rel .co{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);margin-bottom:3px}
+.rel .mn{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:15px;line-height:1.2;margin:0 0 4px}
+.rel .meta{font-size:11.5px;color:var(--ink2);margin:0 0 5px}
+.rel .meta b{font-weight:600;color:var(--ink)}
+.rel .note{font-size:12.5px;color:var(--ink);margin:0}
+.empty-state{font-size:13px;color:var(--ink2);margin:0}
+
+/* ---------- charts ---------- */
+.chart{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:14px 14px 6px;margin-top:14px}
+.chart h4{font-family:"Bricolage Grotesque",sans-serif;font-weight:500;font-size:14px;margin:0 0 2px}
+.chart p.cap{font-size:12px;color:var(--ink2);margin:0 0 8px;max-width:74ch}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.axis{font-size:10px;fill:var(--ink3)}
+.gl{stroke:var(--grid);stroke-width:1}
+
+/* ---------- tooltip ---------- */
+#tip{
+  position:fixed;z-index:50;pointer-events:none;opacity:0;transition:opacity .08s;
+  background:var(--ink);color:#fff;font-size:11.5px;line-height:1.35;
+  padding:6px 8px;border-radius:3px;max-width:250px;
+}
+#tip b{font-weight:600}
+footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--rule);font-size:12px;color:var(--ink2);max-width:78ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Every open-weight model drop, 2019 to now</h1>
+  <p>Each marker is a day a major lab published downloadable weights. Colour and shape identify the lab. Pick any marked day to read what shipped, or scroll down to see how the release cadence has changed.</p>
+  <div class="tally">
+    <div><span class="n" id="tTotal">—</span><span class="l">releases tracked</span></div>
+    <div><span class="n" id="tLabs">—</span><span class="l">labs</span></div>
+    <div><span class="n" id="tYear">—</span><span class="l">in the last 12 months</span></div>
+    <div><span class="n" id="tGap">—</span><span class="l">median days between drops, 2026</span></div>
+  </div>
+</header>
+
+<div class="spectrum"><svg id="spectrum" viewBox="0 0 1000 96" preserveAspectRatio="none" role="img" aria-label="Timeline of all releases from 2019 to 2026"></svg></div>
+
+<div class="section-head">
+  <h2>Who's shipping</h2>
+  <div class="hint">Click a lab to hide or show it everywhere on this page</div>
+</div>
+<div class="legend" id="legend"></div>
+
+<div class="section-head">
+  <h2>Calendar</h2>
+  <div class="hint">Shaded days have a release</div>
+</div>
+<div class="years" id="years"></div>
+
+<div class="cal-layout">
+  <div class="months" id="months"></div>
+  <aside class="detail" id="detail"></aside>
+</div>
+
+<div class="section-head">
+  <h2>Release cadence</h2>
+  <div class="hint">Three views on release frequency over time</div>
+</div>
+
+<div class="chart">
+  <h4>Each lab's release history</h4>
+  <p class="cap">One row per lab. Gaps show dormancy, clusters show a push. Watch how the centre of gravity moves from Meta and Mistral in 2023–24 to the Chinese labs from mid-2025 onward.</p>
+  <svg id="lanes" role="img" aria-label="Per-lab release timelines"></svg>
+</div>
+
+<div class="chart">
+  <h4>Releases per quarter</h4>
+  <p class="cap">Stacked by lab, with the running total as a line. The bars show volume; the line shows how quickly the corpus of downloadable frontier-ish models is accumulating.</p>
+  <svg id="quarters" role="img" aria-label="Releases per quarter, stacked by lab"></svg>
+</div>
+
+<div class="chart">
+  <h4>Days since the previous release, ecosystem-wide</h4>
+  <p class="cap">Every release plotted against the gap that preceded it. A falling ceiling means the whole field is shipping on a shorter clock, not just that more labs joined. The dashed line is a 10-release rolling median.</p>
+  <svg id="gaps" role="img" aria-label="Gap in days between consecutive releases over time"></svg>
+</div>
+
+<footer>
+  Coverage is deliberately selective: flagship and family-defining open-weight drops, not every fine-tune, quantisation or point checkpoint. Dates are the public announcement date, which for several 2026 models precedes the Hugging Face weight upload by a few days. Dates marked with <b>≈</b> are approximate to the week. Some 2026 announcement dates are reported inconsistently across trackers &mdash; verify before quoting.
+</footer>
+</div>
+
+<div id="tip"></div>
+
+<script>
+const LABS = {
+  meta:      {name:"Meta",              color:"#1E6FD9", shape:"circle"},
+  google:    {name:"Google",            color:"#1B9E4B", shape:"circle"},
+  mistral:   {name:"Mistral AI",        color:"#FF6F00", shape:"circle"},
+  alibaba:   {name:"Alibaba / Qwen",    color:"#7B3FE4", shape:"circle"},
+  microsoft: {name:"Microsoft",         color:"#C62828", shape:"circle"},
+  deepseek:  {name:"DeepSeek",          color:"#0F8C8C", shape:"square"},
+  openai:    {name:"OpenAI",            color:"#2E2E2E", shape:"square"},
+  moonshot:  {name:"Moonshot AI",       color:"#E5177B", shape:"square"},
+  zai:       {name:"Z.ai / Zhipu",      color:"#9A6B00", shape:"square"},
+  minimax:   {name:"MiniMax",           color:"#5C7CFA", shape:"square"},
+  nvidia:    {name:"NVIDIA",            color:"#76B900", shape:"diamond"},
+  xai:       {name:"xAI",               color:"#6B7280", shape:"diamond"},
+  cohere:    {name:"Cohere",            color:"#0E9AA7", shape:"diamond"},
+  ai2:       {name:"Allen Institute",   color:"#E8873A", shape:"diamond"},
+  tii:       {name:"TII / Falcon",      color:"#8B5A2B", shape:"diamond"},
+  tencent:   {name:"Tencent",           color:"#2AB0C7", shape:"triangle"},
+  hf:        {name:"Hugging Face",      color:"#FFB300", shape:"triangle"},
+  eleuther:  {name:"EleutherAI",        color:"#A64DFF", shape:"triangle"},
+  ibm:       {name:"IBM",               color:"#52489C", shape:"triangle"}
+};
+
+// [date, lab, model, size, license, note, approx?]
+const R = [
+["2019-11-05","openai","GPT-2 1.5B","1.5B dense","MIT","Full weights after a staged, safety-motivated rollout. The reference point everyone still dates the movement from."],
+["2021-03-21","eleuther","GPT-Neo","1.3B / 2.7B","MIT","First credible community reproduction of the GPT-3 recipe, trained on the Pile."],
+["2021-06-09","eleuther","GPT-J-6B","6B dense","Apache 2.0","For a year, the default open model for anyone who couldn't get GPT-3 access."],
+["2022-02-09","eleuther","GPT-NeoX-20B","20B dense","Apache 2.0","Scaled the community stack an order of magnitude; the NeoX codebase went on to train many other models."],
+["2022-05-03","meta","OPT-175B","125M–175B","Research only","Meta's first big weight release. Gated to researchers, and shipped with an unusually candid training logbook."],
+["2022-07-12","hf","BLOOM","176B dense","RAIL","BigScience's 46-language multilingual model, trained in the open on Jean Zay over 117 days."],
+["2023-02-24","meta","LLaMA","7B / 13B / 33B / 65B","Research only","Leaked within a week and detonated the local-LLM ecosystem. llama.cpp, Alpaca and QLoRA all trace here."],
+["2023-03-14","zai","ChatGLM-6B","6B dense","Custom","Zhipu's bilingual chat model; the start of the GLM line that becomes a frontier contender by 2026."],
+["2023-04-03","eleuther","Pythia suite","70M–12B","Apache 2.0","16 models with 154 checkpoints each, same data order throughout. Built for interpretability, not benchmarks.",true],
+["2023-05-04","hf","StarCoder","15.5B dense","OpenRAIL-M","BigCode's permissively-sourced code model with an opt-out data pipeline."],
+["2023-05-25","tii","Falcon-40B","40B dense","Apache 2.0","First genuinely commercial-friendly model near the frontier; RefinedWeb showed filtered web data could beat curated corpora."],
+["2023-06-20","microsoft","phi-1","1.3B dense","MIT","\"Textbooks are all you need\" — synthetic curricula beating models 10x its size on code."],
+["2023-07-18","meta","Llama 2","7B / 13B / 70B","Llama 2 Community","The permissive-ish relicensing that made open weights a business decision rather than a research artifact."],
+["2023-08-03","alibaba","Qwen-7B","7B dense","Tongyi Qianwen","Alibaba's first open release, and the start of the highest-cadence release programme in the field."],
+["2023-08-24","meta","Code Llama","7B–34B","Llama 2 Community","Long-context code specialisation of Llama 2; the base for a generation of coding fine-tunes."],
+["2023-09-06","tii","Falcon-180B","180B dense","Falcon 180B TII","Briefly the largest openly downloadable model in existence."],
+["2023-09-11","microsoft","phi-1.5","1.3B dense","MIT","Extended the synthetic-data thesis from code to general reasoning."],
+["2023-09-27","mistral","Mistral 7B","7B dense","Apache 2.0","Sliding-window attention, Apache 2.0, and it beat Llama 2 13B. Announced with a magnet link."],
+["2023-11-29","deepseek","DeepSeek LLM 67B","7B / 67B","Custom","DeepSeek's opening move, with scaling-law work that reads as a statement of intent."],
+["2023-11-30","alibaba","Qwen-72B","72B dense","Tongyi Qianwen","First Chinese open model to be broadly competitive with Llama 2 70B."],
+["2023-12-11","mistral","Mixtral 8x7B","47B total / 13B active","Apache 2.0","The release that made sparse mixture-of-experts the default architecture for open frontier models."],
+["2023-12-12","microsoft","Phi-2","2.7B dense","MIT","Small-model reasoning that embarrassed several 25B-plus models on benchmarks."],
+["2024-01-11","deepseek","DeepSeekMoE 16B","16.4B / 2.8B active","Custom","Fine-grained expert segmentation plus shared experts — the architecture that leads directly to V2 and V3."],
+["2024-02-01","ai2","OLMo 7B","1B / 7B","Apache 2.0","Weights, data (Dolma), training code and every intermediate checkpoint. Genuinely open source, not just open weights."],
+["2024-02-05","alibaba","Qwen1.5","0.5B–72B","Tongyi Qianwen","Full size ladder from 0.5B up, with day-one support in every major inference runtime."],
+["2024-02-21","google","Gemma 2B / 7B","2B / 7B dense","Gemma Terms","Google's first open weights, distilled from the Gemini work."],
+["2024-03-11","cohere","Command R","35B dense","CC-BY-NC","Built for retrieval and tool use rather than chat benchmarks."],
+["2024-03-17","xai","Grok-1","314B / 86B active","Apache 2.0","A 314B MoE base checkpoint dumped via torrent with no fine-tuning and essentially no documentation."],
+["2024-04-04","cohere","Command R+","104B dense","CC-BY-NC","Multi-step tool use and strong multilingual retrieval at a size you could actually self-host."],
+["2024-04-09","google","CodeGemma","2B / 7B","Gemma Terms","Fill-in-the-middle code variants of the Gemma base."],
+["2024-04-17","mistral","Mixtral 8x22B","141B / 39B active","Apache 2.0","Another magnet-link release; the largest Apache-licensed model of its moment."],
+["2024-04-18","meta","Llama 3","8B / 70B","Llama 3 Community","15T training tokens and a new tokenizer. The 8B became the default fine-tuning base for over a year."],
+["2024-04-23","microsoft","Phi-3","3.8B / 7B / 14B","MIT","Phi-3-mini ran usefully on a phone, which is most of the point."],
+["2024-05-06","deepseek","DeepSeek-V2","236B / 21B active","Custom","Multi-head latent attention cut the KV cache by ~93% and started the Chinese API price war."],
+["2024-05-14","google","PaliGemma","3B","Gemma Terms","Vision-language open weights built on SigLIP plus Gemma."],
+["2024-05-23","cohere","Aya 23","8B / 35B","CC-BY-NC","23 languages, from a 3,000-researcher open science effort."],
+["2024-05-29","mistral","Codestral 22B","22B dense","MNPL (non-prod)","80+ languages, but a non-production licence that annoyed a lot of people."],
+["2024-06-06","alibaba","Qwen2","0.5B–72B","Apache 2.0 (most)","Apache 2.0 across most of the range — a deliberate licensing shot at Llama."],
+["2024-06-14","nvidia","Nemotron-4 340B","340B dense","NVIDIA Open Model","Released mainly as a synthetic-data generator, with the reward model published alongside."],
+["2024-06-17","deepseek","DeepSeek-Coder-V2","236B / 21B active","Custom","First open model to genuinely trade blows with GPT-4-Turbo on code."],
+["2024-06-27","google","Gemma 2","9B / 27B","Gemma Terms","Logit soft-capping and interleaved attention; the 27B punched well above its size class."],
+["2024-07-16","hf","SmolLM","135M / 360M / 1.7B","Apache 2.0","Tiny models with a fully documented synthetic corpus, aimed at on-device."],
+["2024-07-18","mistral","Mistral NeMo 12B","12B dense","Apache 2.0","Built with NVIDIA; introduced the Tekken tokenizer and a 128K context."],
+["2024-07-23","meta","Llama 3.1 405B","8B / 70B / 405B","Llama 3.1 Community","The moment a downloadable model credibly matched the closed frontier. Also settled the dense-vs-MoE debate in MoE's favour by showing what dense costs."],
+["2024-07-24","mistral","Mistral Large 2","123B dense","MRL (research)","Frontier-class weights, but research-only licensing."],
+["2024-07-31","google","Gemma 2 2B","2.6B dense","Gemma Terms","Distilled from the larger Gemma 2s; strong for its footprint."],
+["2024-08-20","microsoft","Phi-3.5","3.8B / 4.2B / 42B MoE","MIT","Added a MoE variant and a vision variant to the Phi line."],
+["2024-08-30","cohere","Command R 08-2024","35B dense","CC-BY-NC","Refresh with better throughput and tool-calling reliability."],
+["2024-09-17","mistral","Pixtral 12B","12B + 400M vision","Apache 2.0","Mistral's first multimodal weights, with native variable-resolution image handling."],
+["2024-09-19","alibaba","Qwen2.5","0.5B–72B","Apache 2.0 (most)","18T tokens. This became the single most fine-tuned open base family of 2024–25."],
+["2024-09-25","meta","Llama 3.2","1B / 3B / 11B / 90B","Llama 3.2 Community","Edge-sized models plus Meta's first open vision models — excluded from the EU at launch."],
+["2024-09-25","ai2","Molmo","1B–72B","Apache 2.0","Open multimodal models trained on human-collected pointing data rather than distilled GPT-4V output."],
+["2024-10-16","mistral","Ministral 3B / 8B","3B / 8B dense","Research / Apache","Edge models with interleaved sliding-window attention."],
+["2024-10-21","ibm","Granite 3.0","2B / 8B (+MoE)","Apache 2.0","Enterprise-targeted, with full training-data disclosure and an indemnity story."],
+["2024-10-24","cohere","Aya Expanse","8B / 32B","CC-BY-NC","Data arbitrage and model merging applied to 23 languages."],
+["2024-11-05","tencent","Hunyuan-Large","389B / 52B active","Tencent Community","Largest open Transformer MoE at the time; Tencent's entry into the open-weight race."],
+["2024-11-12","alibaba","Qwen2.5-Coder","0.5B–32B","Apache 2.0","The 32B matched GPT-4o on several code benchmarks and became the default local coding model."],
+["2024-11-26","ai2","OLMo 2","7B / 13B","Apache 2.0","Stability fixes plus a two-stage curriculum; closed most of the gap to Llama 3.1 with fully open data."],
+["2024-11-28","alibaba","QwQ-32B-Preview","32B dense","Apache 2.0","First open reasoning model with visible chain-of-thought, a few weeks after o1-preview."],
+["2024-12-02","mistral","Pixtral Large","124B multimodal","MRL (research)","Frontier multimodal weights under a research licence."],
+["2024-12-06","meta","Llama 3.3 70B","70B dense","Llama 3.3 Community","405B-class quality at 70B — post-training, not scale."],
+["2024-12-12","microsoft","Phi-4","14B dense","MIT","Heavy synthetic curriculum; beat much larger models on maths and reasoning."],
+["2024-12-17","tii","Falcon 3","1B–10B","Falcon LLM licence","Efficiency-focused refresh aimed at single-GPU deployment."],
+["2024-12-18","ibm","Granite 3.1","2B / 8B (+MoE)","Apache 2.0","128K context and improved function calling."],
+["2024-12-26","deepseek","DeepSeek-V3","671B / 37B active","DeepSeek Model License","2.8M H800-hours, roughly $5.6M in compute, and frontier-adjacent quality. The efficiency result that reframed the cost question."],
+["2025-01-15","minimax","MiniMax-Text-01","456B / 45.9B active","MiniMax Model","Lightning attention hybrid with a 4M-token context — the most aggressive long-context bet of the year."],
+["2025-01-20","deepseek","DeepSeek-R1","671B / 37B active","MIT","Pure-RL reasoning training, MIT-licensed weights, plus six distilled Qwen and Llama checkpoints. Moved markets and reset expectations for open reasoning."],
+["2025-01-28","alibaba","Qwen2.5-VL","3B / 7B / 72B","Apache 2.0","Document parsing, video understanding and GUI grounding — the start of open models being useful as computer-use agents."],
+["2025-01-30","mistral","Mistral Small 3","24B dense","Apache 2.0","Latency-optimised: fewer layers, no reasoning traces, 150 tok/s on a 4090."],
+["2025-02-05","ibm","Granite 3.2","2B / 8B","Apache 2.0","Toggleable reasoning and a document-vision variant."],
+["2025-02-26","microsoft","Phi-4-mini / multimodal","3.8B / 5.6B","MIT","Speech, vision and text in one 5.6B checkpoint via a mixture-of-LoRAs design."],
+["2025-03-06","alibaba","QwQ-32B","32B dense","Apache 2.0","32B matching R1-class reasoning on several benchmarks. Ran on one consumer GPU."],
+["2025-03-12","google","Gemma 3","1B / 4B / 12B / 27B","Gemma Terms","Multimodal, 128K context, 140 languages. The 27B ran on a single H100 and topped the open LMArena ranking."],
+["2025-03-13","cohere","Command A","111B dense","CC-BY-NC","Ran on two GPUs, aimed squarely at enterprise agentic workloads."],
+["2025-03-17","mistral","Mistral Small 3.1","24B dense","Apache 2.0","Added vision and a 128K window while keeping the speed."],
+["2025-03-24","deepseek","DeepSeek-V3-0324","671B / 37B active","MIT","Relicensed to MIT and quietly uploaded with no announcement, a large post-training jump."],
+["2025-04-05","meta","Llama 4 Scout & Maverick","109B / 400B MoE","Llama 4 Community","Meta's first natively multimodal MoE, with a 10M-token claim for Scout. A contested benchmark submission blunted the reception."],
+["2025-04-14","zai","GLM-4-32B","9B / 32B","MIT","MIT-licensed and competitive at 32B; the point where Zhipu became a serious open-weight player."],
+["2025-04-29","alibaba","Qwen3","0.6B–235B MoE","Apache 2.0","Hybrid thinking / non-thinking modes in one checkpoint, across nine sizes, all Apache 2.0."],
+["2025-04-30","microsoft","Phi-4-reasoning","14B dense","MIT","Reasoning distilled into a 14B that fit comfortably on consumer hardware."],
+["2025-05-21","mistral","Devstral Small","24B dense","Apache 2.0","Purpose-built for SWE-bench-style agentic code editing rather than snippet completion."],
+["2025-05-21","tii","Falcon-H1","0.5B–34B","Falcon LLM licence","Parallel hybrid of Mamba-2 state-space layers and attention."],
+["2025-05-28","deepseek","DeepSeek-R1-0528","671B / 37B active","MIT","Deeper reasoning, far fewer hallucinations, plus an 8B Qwen3 distill."],
+["2025-06-10","mistral","Magistral Small","24B dense","Apache 2.0","Europe's first open reasoning model, with traces in the user's own language."],
+["2025-06-16","minimax","MiniMax-M1","456B / 45.9B active","Apache 2.0","1M-token input with lightning attention; trained with RL for ~$535K in compute."],
+["2025-06-20","mistral","Mistral Small 3.2","24B dense","Apache 2.0","Instruction-following and function-calling fixes over 3.1."],
+["2025-06-26","google","Gemma 3n","E2B / E4B","Gemma Terms","Per-layer embeddings and MatFormer nesting for phone-class memory budgets."],
+["2025-07-08","hf","SmolLM3","3B dense","Apache 2.0","Dual-mode reasoning at 3B with the full training recipe published."],
+["2025-07-11","moonshot","Kimi K2","1T / 32B active","Modified MIT","The first trillion-parameter open weights, trained with the MuonClip optimiser and built for tool use."],
+["2025-07-15","mistral","Voxtral","3B / 24B","Apache 2.0","Open speech understanding with long-form transcription and direct voice Q&A."],
+["2025-07-22","alibaba","Qwen3-235B-A22B-2507","235B / 22B active","Apache 2.0","Qwen abandoned hybrid thinking and split into separate instruct and thinking checkpoints."],
+["2025-07-23","alibaba","Qwen3-Coder 480B","480B / 35B active","Apache 2.0","Agentic coding at 256K native context, shipped with its own CLI."],
+["2025-07-28","zai","GLM-4.5 / 4.5-Air","355B / 106B MoE","MIT","Unified reasoning, coding and agentic use in one model; briefly the top open-weight agentic scorer."],
+["2025-08-05","openai","gpt-oss-120b / 20b","117B / 21B MoE","Apache 2.0","OpenAI's first open weights since GPT-2. Native MXFP4, adjustable reasoning effort, 120B on a single 80GB card."],
+["2025-08-14","google","Gemma 3 270M","270M dense","Gemma Terms","Deliberately tiny, built to be fine-tuned for one narrow job."],
+["2025-08-18","nvidia","Nemotron Nano 2","9B hybrid","NVIDIA Open Model","Mamba-Transformer hybrid with most of the pretraining corpus released alongside."],
+["2025-08-21","deepseek","DeepSeek-V3.1","671B / 37B active","MIT","Merged chat and reasoning into one hybrid checkpoint with a thinking toggle."],
+["2025-08-23","xai","Grok 2.5 weights","270B MoE","Grok 2 Community","Last year's production model released under a licence with an anti-distillation clause."],
+["2025-09-11","alibaba","Qwen3-Next 80B-A3B","80B / 3B active","Apache 2.0","Gated DeltaNet hybrid attention with a 1:50 activation ratio. The architecture Qwen3.5 is built on."],
+["2025-09-22","alibaba","Qwen3-Omni","30B MoE","Apache 2.0","End-to-end text, image, audio and video in and out, with a talker-thinker split."],
+["2025-09-29","deepseek","DeepSeek-V3.2-Exp","671B / 37B active","MIT","DeepSeek Sparse Attention halved long-context cost and triggered a 50%+ API price cut."],
+["2025-09-30","zai","GLM-4.6","355B / 32B active","MIT","200K context and a real jump on agentic coding evals."],
+["2025-10-27","minimax","MiniMax-M2","230B / 10B active","MIT","Deliberately small activation count for cheap, fast agent loops. Became a router favourite."],
+["2025-10-29","openai","gpt-oss-safeguard","120B / 20B","Apache 2.0","Classifies content against a policy you supply at inference time, with its reasoning exposed."],
+["2025-11-06","moonshot","Kimi K2 Thinking","1T / 32B active","Modified MIT","200–300 sequential tool calls without drift. The first open model to lead Humanity's Last Exam with tools."],
+["2025-11-20","ai2","OLMo 3","7B / 32B","Apache 2.0","Full model flow released: every checkpoint, dataset and intermediate stage from base to RL."],
+["2025-12-15","zai","GLM-4.7","355B MoE","MIT","Multi-token prediction added; incremental over 4.6 but the last step before GLM-5.",true],
+["2025-12-16","minimax","MiniMax-M2.1","230B / 10B active","MIT","Refresh with MTP and better agentic reliability.",true],
+["2026-01-27","moonshot","Kimi K2.5","1.04T / 32B active","Modified MIT","Native INT4 weights via quantisation-aware training, early-fusion vision, and \"agent swarm\" parallel tool use. Set the open-weight ceiling at release."],
+["2026-02-04","alibaba","Qwen3-Coder-Next","80B / 3B active","Apache 2.0","3B active parameters beating 32B-active models on coding. The clearest sparsity result of the year."],
+["2026-02-11","zai","GLM-5","1T / 32B active","MIT","MLA plus DeepSeek Sparse Attention, 28.5T tokens, and the top open scores on SWE-bench Verified and Terminal-Bench."],
+["2026-02-12","minimax","MiniMax-M2.5","230B / 10B active","MIT","Plain grouped-query attention, no exotic tricks, and it out-drew both GLM-5 and Kimi K2.5 on OpenRouter."],
+["2026-02-16","alibaba","Qwen3.5-397B-A17B","397B / 17B active","Apache 2.0","Gated DeltaNet hybrid attention across a 0.8B-to-397B ladder, all multimodal and reasoning by default."],
+["2026-03-16","mistral","Mistral Small 4","119B MoE","Apache 2.0","Apache 2.0 with no asterisks, at a size two GPUs can serve.",true],
+["2026-04-07","zai","GLM-5.1","MoE","MIT","Took the lead on SWE-bench Pro and Terminal-Bench for coding agents."],
+["2026-04-15","google","Gemma 4","up to 27B","Apache 2.0","Google moved Gemma to Apache 2.0 — the licence complaint that had dogged the family since 2024 finally resolved.",true],
+["2026-04-20","moonshot","Kimi K2.6","1T / 32B active","Modified MIT","Interim refresh on the K2 architecture ahead of K3."],
+["2026-04-24","deepseek","DeepSeek-V4 preview","1.6T Pro / 284B Flash","MIT","484 days after V3. Token-wise compression plus sparse attention make a 1M-token window the default rather than a premium tier."],
+["2026-04-29","mistral","Mistral Medium 3.5","128B dense","Modified MIT","Mistral's largest openly-licensed dense model."],
+["2026-06-01","minimax","MiniMax M3","MoE","MIT","First open model to combine frontier coding, a 1M window and native multimodality in one checkpoint."],
+["2026-06-01","alibaba","Qwen3.5 9B","9B dense","Apache 2.0","The small end of the Qwen3.5 ladder, aimed at single-GPU and edge deployment."],
+["2026-06-12","moonshot","Kimi K2.7 Code","1T / 32B active","Modified MIT","+21.8% on Moonshot's own code benchmark, plus a HighSpeed variant with roughly 6x faster inference."],
+["2026-06-13","zai","GLM-5.2","~753B MoE","MIT","MIT weights on Hugging Face three days after announcement, with an FP8 variant alongside."],
+["2026-07-16","moonshot","Kimi K3","2.8T / ~50B active","Kimi K3 License","16 of 896 experts per token, native vision, 1M context. The largest open-weight model ever released, and first on four of eight agentic benchmarks. Read the commercial-inference clause before shipping."],
+["2026-07-31","deepseek","DeepSeek-V4-Flash-0731","~304B / ~13B active","MIT","The small half of V4 shipped as real open weights, 167GB across 48 shards."],
+["2026-08-13","deepseek","DeepSeek-V4-Pro-0813","1.6T MoE","MIT","The 1.6T flagship left preview and went generally available."],
+["2026-08-26","alibaba","Qwen3.8-Flash-Next","~125B / 6B active","Apache 2.0","Experimental preview of the Qwen4 architecture: 512 experts, Gated DeltaNet plus Qwen sparse attention, 262K native context."],
+["2026-08-28","tencent","Hunyuan Hy4-preview","770B / ~49B active","Apache 2.0","78 layers, 256 routed experts, native multi-token prediction, 1M context, aimed at long-horizon software engineering."]
+];
+
+/* ---------- prep ---------- */
+const rel = R.map((r,i)=>({
+  i, date:r[0], lab:r[1], model:r[2], size:r[3], license:r[4], note:r[5], approx:!!r[6],
+  t:Date.parse(r[0]+"T00:00:00Z")
+})).sort((a,b)=>a.t-b.t);
+
+const byDate = {};
+rel.forEach(r=>{ (byDate[r.date] ||= []).push(r); });
+
+const YEARS = [...new Set(rel.map(r=>+r.date.slice(0,4)))].sort();
+const T0 = Date.UTC(2019,6,1), T1 = Date.UTC(2026,9,1);
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DOW = ["M","T","W","T","F","S","S"];
+
+let enabled = new Set(Object.keys(LABS));
+let year = 2026;
+let selected = null;
+
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const active = ()=>rel.filter(r=>enabled.has(r.lab));
+const fmtDate = d=>{const [y,m,dd]=d.split("-");return `${+dd} ${MONTHS[+m-1]} ${y}`;};
+const glyph = (lab,cls="")=>`<span class="mk ${LABS[lab].shape} ${cls}" style="color:${LABS[lab].color}"></span>`;
+
+/* SVG marker path */
+function svgMark(lab,cx,cy,r,extra=""){
+  const c = LABS[lab].color, s = LABS[lab].shape;
+  if(s==="circle") return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}" ${extra}/>`;
+  if(s==="square") return `<rect x="${cx-r}" y="${cy-r}" width="${2*r}" height="${2*r}" fill="${c}" ${extra}/>`;
+  if(s==="diamond") return `<polygon points="${cx},${cy-r*1.25} ${cx+r*1.25},${cy} ${cx},${cy+r*1.25} ${cx-r*1.25},${cy}" fill="${c}" ${extra}/>`;
+  return `<polygon points="${cx},${cy-r*1.3} ${cx+r*1.25},${cy+r} ${cx-r*1.25},${cy+r}" fill="${c}" ${extra}/>`;
+}
+
+/* ---------- tooltip ---------- */
+const tip = $("#tip");
+function showTip(e,html){ tip.innerHTML=html; tip.style.opacity=1; moveTip(e); }
+function moveTip(e){
+  const pad=12, w=tip.offsetWidth, h=tip.offsetHeight;
+  let x=e.clientX+pad, y=e.clientY+pad;
+  if(x+w>innerWidth-8) x=e.clientX-w-pad;
+  if(y+h>innerHeight-8) y=e.clientY-h-pad;
+  tip.style.left=x+"px"; tip.style.top=y+"px";
+}
+function hideTip(){ tip.style.opacity=0; }
+addEventListener("scroll",hideTip,{passive:true});
+
+/* ---------- tallies ---------- */
+function tallies(){
+  const a = active();
+  $("#tTotal").textContent = a.length;
+  $("#tLabs").textContent = enabled.size;
+  const cut = Date.UTC(2025,8,2);
+  $("#tYear").textContent = a.filter(r=>r.t>=cut).length;
+  const y26 = a.filter(r=>r.date>="2026-01-01").map(r=>r.t).sort((x,y)=>x-y);
+  let med="—";
+  if(y26.length>2){
+    const gaps=[]; for(let i=1;i<y26.length;i++) gaps.push((y26[i]-y26[i-1])/864e5);
+    gaps.sort((x,y)=>x-y);
+    med = Math.round(gaps[Math.floor(gaps.length/2)]);
+  }
+  $("#tGap").textContent = med;
+}
+
+/* ---------- spectrum ---------- */
+function spectrum(){
+  const W=1000,H=96,L=0,top=16,bot=70;
+  const x = t=>(t-T0)/(T1-T0)*W;
+  let s="";
+  // year bands
+  for(let y=2019;y<=2026;y++){
+    const x0=x(Date.UTC(y,0,1)), x1=x(Date.UTC(y+1,0,1));
+    if(x1<0||x0>W) continue;
+    if(y%2===0) s+=`<rect x="${Math.max(0,x0)}" y="${top}" width="${Math.min(W,x1)-Math.max(0,x0)}" height="${bot-top}" fill="#E3E9EC"/>`;
+    s+=`<line x1="${x0}" y1="${top}" x2="${x0}" y2="${bot+6}" class="gl"/>`;
+    const mid=(Math.max(0,x0)+Math.min(W,x1))/2;
+    s+=`<text x="${mid}" y="${H-6}" text-anchor="middle" class="axis" style="font-size:13px;fill:#57646E">${y}</text>`;
+  }
+  s+=`<rect x="0" y="${top}" width="${W}" height="${bot-top}" fill="none" stroke="#C3CDD4"/>`;
+  // ticks, jittered vertically by lab index for legibility
+  const keys=Object.keys(LABS);
+  active().forEach(r=>{
+    const xx=x(r.t);
+    const j = top+4 + (keys.indexOf(r.lab)/(keys.length-1))*(bot-top-8);
+    s+=`<line x1="${xx}" y1="${top+1}" x2="${xx}" y2="${bot-1}" stroke="${LABS[r.lab].color}" stroke-width="1" opacity=".28"/>`;
+    s+=svgMark(r.lab,xx,j,2.6,`opacity=".95"`);
+  });
+  $("#spectrum").innerHTML=s;
+}
+
+/* ---------- legend ---------- */
+function legend(){
+  const counts={}; rel.forEach(r=>counts[r.lab]=(counts[r.lab]||0)+1);
+  const order=Object.keys(LABS).sort((a,b)=>counts[b]-counts[a]);
+  let h = order.map(k=>`<button class="chip" data-lab="${k}" aria-pressed="${enabled.has(k)}">
+      ${glyph(k)}<span>${esc(LABS[k].name)}</span><span class="ct">${counts[k]}</span></button>`).join("");
+  h += `<button class="chip util" data-all="1">Show all</button><button class="chip util" data-none="1">Hide all</button>`;
+  $("#legend").innerHTML=h;
+}
+$("#legend").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.all) enabled=new Set(Object.keys(LABS));
+  else if(b.dataset.none) enabled=new Set();
+  else { const k=b.dataset.lab; enabled.has(k)?enabled.delete(k):enabled.add(k); }
+  renderAll();
+});
+
+/* ---------- year buttons ---------- */
+function years(){
+  const counts={}; active().forEach(r=>{const y=+r.date.slice(0,4);counts[y]=(counts[y]||0)+1;});
+  $("#years").innerHTML = YEARS.map(y=>
+    `<button class="yr" data-y="${y}" aria-pressed="${y===year}">${y}<span class="ct">${counts[y]||0}</span></button>`
+  ).join("");
+}
+$("#years").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-y]"); if(!b) return;
+  year=+b.dataset.y; years(); calendar(); detail();
+});
+
+/* ---------- calendar ---------- */
+function calendar(){
+  let out="";
+  for(let m=0;m<12;m++){
+    const first=new Date(Date.UTC(year,m,1));
+    const dim=new Date(Date.UTC(year,m+1,0)).getUTCDate();
+    let lead=(first.getUTCDay()+6)%7; // Monday first
+    let cells="", mcount=0;
+    for(let i=0;i<lead;i++) cells+=`<div class="day blank"></div>`;
+    for(let d=1;d<=dim;d++){
+      const key=`${year}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      const list=(byDate[key]||[]).filter(r=>enabled.has(r.lab));
+      if(!list.length){ cells+=`<div class="day">${d}</div>`; continue; }
+      mcount+=list.length;
+      const show=list.slice(0,3);
+      const pips=show.map(r=>glyph(r.lab)).join("")+(list.length>3?`<span class="more">+</span>`:"");
+      const names=list.map(r=>`<b>${esc(r.model)}</b><br>${esc(LABS[r.lab].name)}`).join("<br><br>");
+      cells+=`<button class="day has${selected===key?" sel":""}" data-d="${key}"
+        data-tip="${esc(names)}" aria-label="${fmtDate(key)}, ${list.length} release${list.length>1?"s":""}">${d}<span class="pips">${pips}</span></button>`;
+    }
+    out+=`<div class="month${mcount?"":" empty"}"><h3>${MONTHS[m]}${mcount?`<em>${mcount}</em>`:""}</h3>
+      <div class="dow">${DOW.map(x=>`<span>${x}</span>`).join("")}</div>
+      <div class="days">${cells}</div></div>`;
+  }
+  $("#months").innerHTML=out;
+}
+$("#months").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-d]"); if(!b) return;
+  selected=b.dataset.d; calendar(); detail();
+  if(innerWidth<1040) $("#detail").scrollIntoView({behavior:"smooth",block:"nearest"});
+});
+$("#months").addEventListener("mouseover",e=>{
+  const b=e.target.closest("button[data-d]"); if(b) showTip(e,b.dataset.tip);
+});
+$("#months").addEventListener("mousemove",e=>{ if(e.target.closest("button[data-d]")) moveTip(e); });
+$("#months").addEventListener("mouseout",e=>{ if(e.target.closest("button[data-d]")) hideTip(); });
+
+/* ---------- detail panel ---------- */
+function detail(){
+  const el=$("#detail");
+  const list = selected ? (byDate[selected]||[]).filter(r=>enabled.has(r.lab)) : [];
+  if(!list.length){
+    const n=active().filter(r=>r.date.startsWith(year)).length;
+    el.innerHTML=`<p class="dt">Nothing selected</p>
+      <p class="dsub">${n} release${n===1?"":"s"} in ${year}</p>
+      <p class="empty-state">Pick a shaded day in the calendar and the models that shipped that day appear here, with size, licence and why they mattered.</p>`;
+    return;
+  }
+  el.innerHTML = `<p class="dt">${fmtDate(selected)}${list.some(r=>r.approx)?" &nbsp;<span style='font-size:13px;color:#8A97A1'>≈</span>":""}</p>
+    <p class="dsub">${list.length} release${list.length>1?"s":""}</p>` +
+    list.map(r=>`<div class="rel">
+      <span class="co">${glyph(r.lab)}${esc(LABS[r.lab].name)}</span>
+      <p class="mn">${esc(r.model)}</p>
+      <p class="meta"><b>${esc(r.size)}</b> &nbsp;·&nbsp; ${esc(r.license)}</p>
+      <p class="note">${esc(r.note)}</p>
+    </div>`).join("");
+}
+
+/* ---------- chart 1: lanes ---------- */
+function lanes(){
+  const keys=Object.keys(LABS).filter(k=>enabled.has(k));
+  const counts={}; rel.forEach(r=>counts[r.lab]=(counts[r.lab]||0)+1);
+  keys.sort((a,b)=>{
+    const fa=rel.find(r=>r.lab===a), fb=rel.find(r=>r.lab===b);
+    return (fa?fa.t:0)-(fb?fb.t:0);
+  });
+  const L=132,Rp=12,Tp=22,rowH=19,W=1000;
+  const H=Tp+keys.length*rowH+26;
+  const x=t=>L+(t-T0)/(T1-T0)*(W-L-Rp);
+  let s="";
+  for(let y=2019;y<=2026;y++){
+    const xx=x(Date.UTC(y,0,1));
+    s+=`<line x1="${xx}" y1="${Tp-8}" x2="${xx}" y2="${Tp+keys.length*rowH}" class="gl"/>`;
+    s+=`<text x="${xx}" y="${Tp-12}" text-anchor="middle" class="axis">${y}</text>`;
+  }
+  keys.forEach((k,i)=>{
+    const y=Tp+i*rowH+rowH/2;
+    if(i%2===0) s+=`<rect x="${L}" y="${y-rowH/2}" width="${W-L-Rp}" height="${rowH}" fill="#F3F6F7"/>`;
+    s+=`<text x="${L-8}" y="${y+3.5}" text-anchor="end" class="axis" style="font-size:10.5px;fill:#10161C">${esc(LABS[k].name)}</text>`;
+    const rs=rel.filter(r=>r.lab===k);
+    if(rs.length>1) s+=`<line x1="${x(rs[0].t)}" y1="${y}" x2="${x(rs[rs.length-1].t)}" y2="${y}" stroke="${LABS[k].color}" stroke-width="1" opacity=".3"/>`;
+    rs.forEach(r=>{ s+=svgMark(r.lab,x(r.t),y,3.4,`class="pt" data-i="${r.i}" style="cursor:pointer"`); });
+  });
+  const g=$("#lanes"); g.setAttribute("viewBox",`0 0 ${W} ${H}`); g.innerHTML=s;
+}
+
+/* ---------- chart 2: quarters ---------- */
+function quarters(){
+  const a=active();
+  if(!a.length){ $("#quarters").innerHTML=""; return; }
+  const qs=[];
+  for(let y=2019;y<=2026;y++) for(let q=0;q<4;q++){
+    if(y===2026&&q>2) break;
+    qs.push({y,q,t:Date.UTC(y,q*3,1),counts:{},total:0});
+  }
+  const idx=new Map(qs.map((o,i)=>[o.y+"-"+o.q,i]));
+  a.forEach(r=>{
+    const y=+r.date.slice(0,4), q=Math.floor((+r.date.slice(5,7)-1)/3);
+    const i=idx.get(y+"-"+q); if(i==null) return;
+    qs[i].counts[r.lab]=(qs[i].counts[r.lab]||0)+1; qs[i].total++;
+  });
+  const W=1000,L=34,Rp=40,Tp=16,B=42,H=300;
+  const max=Math.max(...qs.map(o=>o.total),1);
+  const bw=(W-L-Rp)/qs.length;
+  const yS=v=>Tp+(1-v/max)*(H-Tp-B);
+  const order=Object.keys(LABS);
+  let s="";
+  for(let v=0;v<=max;v+=Math.ceil(max/5)){
+    s+=`<line x1="${L}" y1="${yS(v)}" x2="${W-Rp}" y2="${yS(v)}" class="gl"/>`;
+    s+=`<text x="${L-6}" y="${yS(v)+3.5}" text-anchor="end" class="axis">${v}</text>`;
+  }
+  qs.forEach((o,i)=>{
+    let acc=0;
+    order.forEach(k=>{
+      const c=o.counts[k]; if(!c) return;
+      const y0=yS(acc+c), y1=yS(acc);
+      s+=`<rect x="${L+i*bw+1}" y="${y0}" width="${bw-2}" height="${Math.max(0,y1-y0)}" fill="${LABS[k].color}"><title>${esc(LABS[k].name)} — ${c} in ${o.y} Q${o.q+1}</title></rect>`;
+      acc+=c;
+    });
+    if(o.q===0){
+      s+=`<line x1="${L+i*bw}" y1="${Tp}" x2="${L+i*bw}" y2="${H-B+4}" stroke="#C3CDD4"/>`;
+      s+=`<text x="${L+i*bw+2}" y="${H-B+16}" class="axis" style="font-size:11px;fill:#57646E">${o.y}</text>`;
+    }
+    if(o.total) s+=`<text x="${L+i*bw+bw/2}" y="${yS(o.total)-4}" text-anchor="middle" class="axis" style="font-size:9px">${o.total}</text>`;
+  });
+  // cumulative line on right axis
+  let cum=0; const pts=qs.map((o,i)=>{cum+=o.total;return [L+i*bw+bw/2, Tp+(1-cum/a.length)*(H-Tp-B)];});
+  s+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#14425E" stroke-width="1.8"/>`;
+  s+=`<text x="${W-Rp+6}" y="${Tp+6}" class="axis" style="fill:#14425E">${a.length}</text>`;
+  s+=`<text x="${W-Rp+6}" y="${Tp+18}" class="axis" style="fill:#14425E">total</text>`;
+  s+=`<text x="${L-6}" y="${Tp-4}" text-anchor="end" class="axis">n</text>`;
+  const g=$("#quarters"); g.setAttribute("viewBox",`0 0 ${W} ${H}`); g.innerHTML=s;
+}
+
+/* ---------- chart 3: gaps ---------- */
+function gaps(){
+  const a=active();
+  if(a.length<3){ $("#gaps").innerHTML=""; return; }
+  const pts=[];
+  for(let i=1;i<a.length;i++) pts.push({t:a[i].t, g:(a[i].t-a[i-1].t)/864e5, r:a[i]});
+  const W=1000,L=34,Rp=12,Tp=16,B=30,H=280;
+  const maxG=Math.max(...pts.map(p=>p.g),10);
+  const x=t=>L+(t-T0)/(T1-T0)*(W-L-Rp);
+  const y=g=>Tp+(1-Math.sqrt(g)/Math.sqrt(maxG))*(H-Tp-B);
+  let s="";
+  [0,7,14,30,60,120,240].filter(v=>v<=maxG).forEach(v=>{
+    s+=`<line x1="${L}" y1="${y(v)}" x2="${W-Rp}" y2="${y(v)}" class="gl"/>`;
+    s+=`<text x="${L-6}" y="${y(v)+3.5}" text-anchor="end" class="axis">${v}</text>`;
+  });
+  for(let yr=2019;yr<=2026;yr++){
+    const xx=x(Date.UTC(yr,0,1));
+    s+=`<line x1="${xx}" y1="${Tp}" x2="${xx}" y2="${H-B}" class="gl"/>`;
+    s+=`<text x="${xx}" y="${H-B+16}" text-anchor="middle" class="axis" style="font-size:11px;fill:#57646E">${yr}</text>`;
+  }
+  // rolling median (window 10)
+  const med=[];
+  for(let i=4;i<pts.length-4;i++){
+    const w=pts.slice(i-4,i+6).map(p=>p.g).sort((m,n)=>m-n);
+    med.push([x(pts[i].t), y(w[Math.floor(w.length/2)])]);
+  }
+  if(med.length>1) s+=`<polyline points="${med.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#14425E" stroke-width="1.6" stroke-dasharray="5 3"/>`;
+  pts.forEach(p=>{ s+=svgMark(p.r.lab,x(p.t),y(p.g),3.2,`class="pt" data-i="${p.r.i}" style="cursor:pointer" opacity=".9"`); });
+  s+=`<text x="${L-6}" y="${Tp-4}" text-anchor="end" class="axis">days</text>`;
+  const g=$("#gaps"); g.setAttribute("viewBox",`0 0 ${W} ${H}`); g.innerHTML=s;
+}
+
+/* shared chart interactions */
+["#lanes","#gaps"].forEach(sel=>{
+  const el=$(sel);
+  el.addEventListener("mouseover",e=>{
+    const p=e.target.closest(".pt"); if(!p) return;
+    const r=rel[+p.dataset.i];
+    showTip(e,`<b>${esc(r.model)}</b><br>${esc(LABS[r.lab].name)} · ${fmtDate(r.date)}`);
+  });
+  el.addEventListener("mousemove",e=>{ if(e.target.closest(".pt")) moveTip(e); });
+  el.addEventListener("mouseout",e=>{ if(e.target.closest(".pt")) hideTip(); });
+  el.addEventListener("click",e=>{
+    const p=e.target.closest(".pt"); if(!p) return;
+    const r=rel[+p.dataset.i];
+    selected=r.date; year=+r.date.slice(0,4);
+    years(); calendar(); detail();
+    document.querySelector(".cal-layout").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+});
+
+function renderAll(){ tallies(); spectrum(); legend(); years(); calendar(); detail(); lanes(); quarters(); gaps(); }
+renderAll();
+
+// spectrum click jumps to a year
+$("#spectrum").addEventListener("click",e=>{
+  const b=e.currentTarget.getBoundingClientRect();
+  const frac=(e.clientX-b.left)/b.width;
+  const t=T0+frac*(T1-T0);
+  const y=new Date(t).getUTCFullYear();
+  if(YEARS.includes(y)){ year=y; years(); calendar(); detail();
+    document.querySelector(".cal-layout").scrollIntoView({behavior:"smooth",block:"start"}); }
+});
+</script>
